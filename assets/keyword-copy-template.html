@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{单品名称}} · 单品拆解</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #fafaf9;
+    color: #1c1917;
+    padding: 24px 16px 48px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20px; font-weight: 700; letter-spacing: 0.5px;
+    display: inline-block; padding-bottom: 6px;
+    border-bottom: 2px solid #1c1917; margin-bottom: 20px;
+  }
+  h2.section-main-title {
+    font-size: 18px; font-weight: 700; color: #1c1917;
+    display: inline-block; padding-bottom: 6px;
+    border-bottom: 2px solid #1c1917;
+    margin: 32px 0 16px 0;
+  }
+  .product-name {
+    font-size: 14px; color: #44403c; font-weight: 500;
+    margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+  }
+  .product-name .label {
+    font-size: 11px; color: #a8a29e; font-weight: 400;
+    background: #f5f5f4; padding: 2px 8px; border-radius: 4px;
+    min-width: 36px; text-align: center;
+  }
+  .product-name .name-text { flex: 1; }
+  .product-name .copy-name-btn {
+    border: 1px solid #e7e5e4; background: #fff; color: #78716c;
+    font-size: 11px; padding: 3px 10px; border-radius: 4px;
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .product-name .copy-name-btn:hover { background: #f5f5f4; color: #44403c; }
+  .product-name .copy-name-btn.copied { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+  .care-block {
+    margin: 10px 0 14px 0;
+    background: #f5f5f4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .care-block .care-label {
+    font-size: 11px; color: #a8a29e; font-weight: 400;
+    background: #fff; padding: 2px 8px; border-radius: 4px;
+    min-width: 48px; text-align: center; flex-shrink: 0; margin-top: 1px;
+  }
+  .care-block .care-text { flex: 1; font-size: 13px; color: #44403c; line-height: 1.6; }
+  .care-block .copy-care-btn {
+    border: 1px solid #e7e5e4; background: #fff; color: #78716c;
+    font-size: 11px; padding: 3px 10px; border-radius: 4px;
+    cursor: pointer; transition: all 0.15s; user-select: none; flex-shrink: 0;
+  }
+  .care-block .copy-care-btn:hover { background: #e7e5e4; color: #44403c; }
+  .care-block .copy-care-btn.copied { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+  .product-img-wrap { margin: 12px 0 20px; text-align: center; }
+  .product-img {
+    max-width: 180px; max-height: 180px;
+    border-radius: 8px; border: 1px solid #e7e5e4;
+    cursor: pointer; transition: transform 0.15s;
+    -webkit-touch-callout: default;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+  .product-img:hover { transform: scale(1.02); }
+  .img-actions { margin-top: 8px; }
+  .copy-image-btn { border: 1px solid #e7e5e4; background: #fff; color: #78716c; font-size: 11px; padding: 5px 12px; border-radius: 5px; cursor: pointer; }
+  .copy-image-btn:hover { background: #f5f5f4; color: #44403c; }
+  .img-hint { font-size: 11px; color: #a8a29e; margin-top: 6px; }
+  .section { margin-bottom: 24px; }
+  .section-title {
+    font-size: 13px; font-weight: 600; color: #78716c;
+    letter-spacing: 2px; margin-bottom: 12px;
+    padding-left: 8px; border-left: 3px solid #d6d3d1;
+  }
+  .keyword-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .keyword-item {
+    display: flex; align-items: center; background: #fff;
+    border: 1px solid #e7e5e4; border-radius: 6px;
+    overflow: hidden; transition: border-color 0.15s;
+  }
+  .keyword-item:hover { border-color: #a8a29e; }
+  .keyword-text { font-size: 13px; padding: 7px 12px; white-space: nowrap; color: #292524; }
+  .copy-btn {
+    border: none; background: #f5f5f4; color: #78716c;
+    font-size: 11px; padding: 7px 10px; cursor: pointer;
+    border-left: 1px solid #e7e5e4; transition: all 0.15s; user-select: none;
+  }
+  .copy-btn:hover { background: #e7e5e4; color: #44403c; }
+  .copy-btn.copied { background: #dcfce7; color: #166534; }
+  .toast {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1c1917; color: #fff; font-size: 13px;
+    padding: 10px 20px; border-radius: 8px; opacity: 0;
+    transition: all 0.25s; pointer-events: none; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .modal {
+    display: none; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 1000;
+    justify-content: center; align-items: center;
+  }
+  .modal.show { display: flex; }
+  .modal img {
+    max-width: 90%; max-height: 90%; border-radius: 8px;
+    -webkit-touch-callout: default;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+  .modal-close {
+    position: absolute; top: 20px; right: 20px;
+    color: #fff; font-size: 28px; cursor: pointer;
+    background: none; border: none;
+  }
+  .modal-tip {
+    position: absolute; bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.6); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<h1>单品拆解</h1>
+<div class="product-name"><span class="label">品牌</span><span class="name-text" id="brandName">{{品牌}}</span></div>
+<div class="product-name"><span class="label">品名</span><span class="name-text" id="productName">{{品名}}</span><button class="copy-name-btn" id="copyNameBtn">拷贝</button></div>
+<div class="product-name"><span class="label">单品名称</span><span class="name-text" id="fullName">{{品牌}} {{产品}}</span><button class="copy-name-btn" id="copyFullNameBtn">拷贝</button></div>
+<div class="care-block" id="careBlock" style="display:none;">
+  <span class="care-label">洗护建议</span>
+  <span class="care-text" id="careText">{{洗护建议}}</span>
+  <button class="copy-care-btn" id="copyCareBtn">拷贝</button>
+</div>
+<div class="product-img-wrap">
+  <img class="product-img" id="productImage" src="{{图片路径}}" alt="单品预览" draggable="false">
+  <div class="img-actions"><button class="copy-image-btn" id="copyImageBtn" type="button">拷贝图片</button></div>
+  <div class="img-hint">点击查看大图；iOS 长按可能由系统接管，使用“拷贝图片”更稳定</div>
+</div>
+
+<h2 class="section-main-title">七维度分析</h2>
+
+<div class="section"><div class="section-title">风 格 定 调</div><div class="keyword-list" id="style"></div></div>
+<div class="section"><div class="section-title">色 彩 构 析</div><div class="keyword-list" id="color"></div></div>
+<div class="section"><div class="section-title">形 制 匠 艺</div><div class="keyword-list" id="craft"></div></div>
+<div class="section"><div class="section-title">本 源 溯 往</div><div class="keyword-list" id="origin"></div></div>
+<div class="section"><div class="section-title">衣 脉 沿 革</div><div class="keyword-list" id="evolution"></div></div>
+<div class="section"><div class="section-title">风 尚 流 变</div><div class="keyword-list" id="fashion"></div></div>
+<div class="section"><div class="section-title">地 域 文 脉</div><div class="keyword-list" id="region"></div></div>
+
+<div class="toast" id="toast">已拷贝</div>
+
+<div class="modal" id="lightbox">
+  <div class="modal-close" id="lightboxClose">&times;</div>
+  <img id="lightboxImg" src="" alt="单品大图">
+  <div class="modal-tip">长按可拷贝图片</div>
+</div>
+
+<script>
+var data = {
+  style: {{风格定调关键词}},
+  color: {{色彩构析关键词}},
+  craft: {{形制匠艺关键词}},
+  origin: {{本源溯往关键词}},
+  evolution: {{衣脉沿革关键词}},
+  fashion: {{风尚流变关键词}},
+  region: {{地域文脉关键词}}
+};
+var toast = document.getElementById('toast');
+var toastTimer;
+function showToast(text) {
+  toast.textContent = text; toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 1500);
+}
+function copyText(text, btn, label) {
+  function success() {
+    if (btn) { btn.classList.add('copied'); btn.textContent = '已拷贝'; }
+    showToast('已拷贝' + (label || ''));
+    setTimeout(function() { if (btn) { btn.classList.remove('copied'); btn.textContent = '拷贝'; } }, 1200);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(success).catch(function() { fallback(); });
+  } else {
+    fallback();
+  }
+  function fallback() {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '0'; ta.style.left = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) { success(); } else { showToast('拷贝失败'); }
+    } catch (e) { showToast('拷贝失败'); }
+  }
+}
+document.getElementById('copyNameBtn').onclick = function() {
+  copyText(document.getElementById('productName').textContent, this, '品名');
+};
+document.getElementById('copyFullNameBtn').onclick = function() {
+  copyText(document.getElementById('fullName').textContent, this, '单品名称');
+};
+var careText = document.getElementById('careText').textContent;
+if (careText && careText.trim() !== '' && careText.trim() !== '{{洗护建议}}') {
+  document.getElementById('careBlock').style.display = 'flex';
+  document.getElementById('copyCareBtn').onclick = function() {
+    copyText(careText, this, '洗护建议');
+  };
+}
+function copyImage(imgEl) {
+  if (!imgEl || !imgEl.src) return;
+  var canvas = document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    ctx.drawImage(img, 0, 0);
+    if (canvas.toBlob) {
+      canvas.toBlob(function(blob) {
+        if (navigator.clipboard && navigator.clipboard.write) {
+          navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
+            showToast('图片已拷贝');
+          }).catch(function() { showToast('长按保存图片'); });
+        } else {
+          showToast('长按保存图片');
+        }
+      }, 'image/png');
+    } else {
+      showToast('长按保存图片');
+    }
+  };
+  img.onerror = function() { showToast('长按保存图片'); };
+  img.src = imgEl.src;
+}
+var longPressTimer = null;
+var productImg = document.getElementById('productImage');
+document.getElementById('copyImageBtn').onclick = function() { copyImage(productImg); };
+function startLongPress(e) {
+  longPressTimer = setTimeout(function() {
+    copyImage(productImg);
+  }, 600);
+}
+function cancelLongPress() {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+}
+productImg.addEventListener('touchstart', startLongPress, { passive: true });
+productImg.addEventListener('touchend', cancelLongPress);
+productImg.addEventListener('touchmove', cancelLongPress);
+productImg.addEventListener('touchcancel', cancelLongPress);
+productImg.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+  copyImage(productImg);
+});
+document.getElementById('productImage').onclick = function() {
+  document.getElementById('lightboxImg').src = this.src;
+  document.getElementById('lightbox').classList.add('show');
+};
+document.getElementById('lightboxClose').onclick = function() {
+  document.getElementById('lightbox').classList.remove('show');
+};
+document.getElementById('lightbox').onclick = function(e) {
+  if (e.target === this) { this.classList.remove('show'); }
+};
+function createItem(kw) {
+  var div = document.createElement('div'); div.className = 'keyword-item';
+  var span = document.createElement('span'); span.className = 'keyword-text'; span.textContent = kw;
+  var btn = document.createElement('button'); btn.className = 'copy-btn'; btn.textContent = '拷贝';
+  btn.onclick = function() { copyText(kw, btn, ''); };
+  div.appendChild(span); div.appendChild(btn); return div;
+}
+Object.keys(data).forEach(function(key) {
+  var container = document.getElementById(key);
+  data[key].forEach(function(kw) { container.appendChild(createItem(kw)); });
+});
+</script>
+</body>
+</html>
